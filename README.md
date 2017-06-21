@@ -4,7 +4,7 @@ CMU's Openpose for ROS
 ## Packages
 
 ```
-$ sudo apt-get install ros-indigo-image-common ros-indigo-vision-opencv ros-indigo-video-stream-opencv
+$ sudo apt-get install ros-indigo-image-common ros-indigo-vision-opencv ros-indigo-video-stream-opencv ros-indigo-image-view
 ```
 ## Test with Camera/Video Files
 
