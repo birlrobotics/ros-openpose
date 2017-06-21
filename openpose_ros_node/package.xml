@@ -1,0 +1,23 @@
+<?xml version="1.0"?>
+<package>
+  <name>openpose_ros_node</name>
+  <version>0.0.1</version>
+  <description>ROS Message Package for CMU's Openpose</description>
+
+  <maintainer email="ildoo@ildoo.net">Curtis Kim</maintainer>
+
+  <license>MIT</license>
+
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <build_depend>roscpp</build_depend>
+  <build_depend>rospy</build_depend>
+  <build_depend>std_msgs</build_depend>
+  <build_depend>cv_bridge</build_depend>
+  <build_depend>image_transport</build_depend>
+  <build_depend>openpose_ros_msgs</build_depend>
+
+  <run_depend>std_msgs</run_depend>
+  <run_depend>image_transport</run_depend>
+
+</package>

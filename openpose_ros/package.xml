@@ -1,0 +1,22 @@
+<package>
+  <name>openpose_ros</name>
+  <version>0.0.1</version>
+  <description>ROS Message Package for CMU's Openpose</description>
+
+  <maintainer email="ildoo@ildoo.net">Curtis Kim</maintainer>
+
+  <license>MIT</license>
+
+  <url type="bugtracker">https://github.com/ildoonet/openpose-ros/issues</url>
+
+  <!-- Dependencies which this package needs to build itself. -->
+  <buildtool_depend>catkin</buildtool_depend>
+
+  <!-- Dependencies needed after this package is compiled. -->
+  <run_depend>openpose_ros_msgs</run_depend>
+  <run_depend>openpose_ros_node</run_depend>
+
+  <export>
+    <metapackage/>
+  </export>
+</package>
