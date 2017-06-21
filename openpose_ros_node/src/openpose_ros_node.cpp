@@ -49,6 +49,7 @@
 #include "openpose_ros_common.hpp"
 
 image_transport::Publisher publish_result;
+ros::Publisher publish_pose;
 
 // See all the available parameter options withe the `--help` flag. E.g. `./build/examples/openpose/openpose.bin --help`.
 // Note: This command will show you flags for other unnecessary 3rdparty files. Check only the flags for the OpenPose
@@ -74,7 +75,7 @@ DEFINE_string(resolution,               "640x480",     "The image resolution (di
                                                         " default images resolution.");
 DEFINE_int32(num_gpu,                   -1,             "The number of GPU devices to use. If negative, it will use all the available GPUs in your"
                                                         " machine.");
-DEFINE_int32(num_gpu_start,             0,              "GPU device start number.");
+DEFINE_int32(num_gpu_start,             1,              "GPU device start number.");
 DEFINE_int32(keypoint_scale,            0,              "Scaling of the (x,y) coordinates of the final pose data array, i.e. the scale of the (x,y)"
                                                         " coordinates that will be saved with the `write_keypoint` & `write_keypoint_json` flags."
                                                         " Select `0` to scale it to the original source resolution, `1`to scale it to the net output"
@@ -353,8 +354,11 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg) {
             bodypart.x = poseKeypoints[final_idx];
             bodypart.y = poseKeypoints[final_idx+1];
             bodypart.confidence = poseKeypoints[final_idx+2];
+            person.body_part.push_back(bodypart);
         }
+        persons.persons.push_back(person);
     }
+    publish_pose.publish(persons);
 
     // publish result image with annotation.
     if (!FLAGS_result_image_topic.empty()) {
@@ -375,7 +379,7 @@ int main(int argc, char *argv[])
 
     FLAGS_resolution = getParam(local_nh, "resolution", std::string("640x480"));
     FLAGS_num_gpu = getParam(local_nh, "num_gpu", -1);
-    FLAGS_num_gpu_start = getParam(local_nh, "num_gpu_start", 0);
+    FLAGS_num_gpu_start = getParam(local_nh, "num_gpu_start", 1);
     FLAGS_model_pose = getParam(local_nh, "model_pose", std::string("COCO"));
     FLAGS_net_resolution = getParam(local_nh, "net_resolution", std::string("640x480"));
     FLAGS_face = getParam(local_nh, "face", false);
@@ -394,6 +398,7 @@ int main(int argc, char *argv[])
     if (!FLAGS_result_image_topic.empty()) {
         publish_result = img_t.advertise(FLAGS_result_image_topic, 1);
     }
+    publish_pose = nh.advertise<openpose_ros_msgs::Persons>("/openpose/pose", 1);
 
     ros::spin();
     return 0; 
