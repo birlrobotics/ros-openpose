@@ -43,6 +43,9 @@
 
 #include <cv_bridge/cv_bridge.h>
 #include <image_transport/image_transport.h>
+#include <openpose_ros_msgs/Persons.h>
+#include <openpose_ros_msgs/BodyPartDetection.h>
+#include <openpose_ros_msgs/PersonDetection.h>
 #include "openpose_ros_common.hpp"
 
 image_transport::Publisher publish_result;
@@ -80,7 +83,7 @@ DEFINE_int32(keypoint_scale,            0,              "Scaling of the (x,y) co
                                                         " with `num_scales` and `scale_gap`.");
 // OpenPose Body Pose
 DEFINE_string(model_pose,               "COCO",         "Model to be used (e.g. COCO, MPI, MPI_4_layers).");
-DEFINE_string(net_resolution,           "352x352",      "Multiples of 16. If it is increased, the accuracy usually increases. If it is decreased,"
+DEFINE_string(net_resolution,           "480x480",      "Multiples of 16. If it is increased, the accuracy usually increases. If it is decreased,"
                                                         " the speed increases.");
 DEFINE_int32(num_scales,                1,              "Number of scales to average.");
 DEFINE_double(scale_gap,                0.3,            "Scale gap between scales. No effect unless num_scales>1. Initial scale is always 1. If you"
@@ -97,13 +100,13 @@ DEFINE_bool(heatmaps_add_PAFs,          false,          "Same functionality as `
 // OpenPose Face
 DEFINE_bool(face,                       false,          "Enables face keypoint detection. It will share some parameters from the body pose, e.g."
                                                         " `model_folder`.");
-DEFINE_string(face_net_resolution,      "184x184",      "Multiples of 16. Analogous to `net_resolution` but applied to the face keypoint detector."
+DEFINE_string(face_net_resolution,      "192x192",      "Multiples of 16. Analogous to `net_resolution` but applied to the face keypoint detector."
                                                         " 320x320 usually works fine while giving a substantial speed up when multiple faces on the"
                                                         " image.");
 // OpenPose Hand
 DEFINE_bool(hand,                       false,          "Enables hand keypoint detection. It will share some parameters from the body pose, e.g."
                                                         " `model_folder`.");
-DEFINE_string(hand_net_resolution,      "368x368",      "Multiples of 16. Analogous to `net_resolution` but applied to the hand keypoint detector.");
+DEFINE_string(hand_net_resolution,      "480x480",      "Multiples of 16. Analogous to `net_resolution` but applied to the hand keypoint detector.");
 // OpenPose Rendering
 DEFINE_int32(part_to_show,              0,              "Part to show from the start.");
 DEFINE_bool(disable_blending,           false,          "If blending is enabled, it will merge the results with the original frame. If disabled, it"
@@ -293,7 +296,7 @@ int init_openpose()
     poseExtractorCaffe = new op::PoseExtractorCaffe(netInputSize, netOutputSize, outputSize, FLAGS_num_scales, poseModel, FLAGS_model_folder, FLAGS_num_gpu_start);
     poseRenderer = new op::PoseRenderer(netOutputSize, outputSize, poseModel, nullptr, !FLAGS_disable_blending, (float)FLAGS_alpha_pose);
     faceDetector = new op::FaceDetector(poseModel);
-    faceExtractor = new op::FaceExtractor(faceNetInputSize, faceNetInputSize, FLAGS_model_folder, FLAGS_num_gpu_start + 1);
+    faceExtractor = new op::FaceExtractor(faceNetInputSize, faceNetInputSize, FLAGS_model_folder, FLAGS_num_gpu_start);
     faceRenderer = new op::FaceRenderer(netOutputSize, (float)FLAGS_alpha_pose, (float) 0.7);
     opOutputToCvMat = new op::OpOutputToCvMat(outputSize);
 
@@ -335,15 +338,31 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg) {
     faceExtractor->forwardPass(faces, cv_ptr->image, scaleInputToOutput);
     const auto faceKeypoints = faceExtractor->getFaceKeypoints();
 
-    // Step 4 - Render poseKeypoints
-    poseRenderer->renderPose(outputArray, poseKeypoints);
-    faceRenderer->renderFace(outputArray, faceKeypoints);
+    // publish annotations.
+    openpose_ros_msgs::Persons persons;
+    
+    const int num_people = poseKeypoints.getSize(0);
+    const int num_bodyparts = poseKeypoints.getSize(1);
 
-    // Step 5 - OpenPose output format to cv::Mat
-    auto outputImage = opOutputToCvMat->formatToCvMat(outputArray);
+    for (size_t person_idx = 0; person_idx < num_people; person_idx++) {
+        openpose_ros_msgs::PersonDetection person;
+        for (size_t bodypart_idx = 0; bodypart_idx < num_bodyparts; bodypart_idx++) {
+            size_t final_idx = 3*(person_idx*num_bodyparts + bodypart_idx);
+            openpose_ros_msgs::BodyPartDetection bodypart;
+            bodypart.part_id = bodypart_idx;
+            bodypart.x = poseKeypoints[final_idx];
+            bodypart.y = poseKeypoints[final_idx+1];
+            bodypart.confidence = poseKeypoints[final_idx+2];
+        }
+    }
 
     // publish result image with annotation.
     if (!FLAGS_result_image_topic.empty()) {
+        poseRenderer->renderPose(outputArray, poseKeypoints);
+        faceRenderer->renderFace(outputArray, faceKeypoints);
+
+        auto outputImage = opOutputToCvMat->formatToCvMat(outputArray);
+
         sensor_msgs::ImagePtr msg = cv_bridge::CvImage(std_msgs::Header(), "bgr8", outputImage).toImageMsg();
         publish_result.publish(msg);
     }
