@@ -83,7 +83,7 @@ DEFINE_int32(keypoint_scale,            0,              "Scaling of the (x,y) co
                                                         " with `num_scales` and `scale_gap`.");
 // OpenPose Body Pose
 DEFINE_string(model_pose,               "COCO",         "Model to be used (e.g. COCO, MPI, MPI_4_layers).");
-DEFINE_string(net_resolution,           "480x480",      "Multiples of 16. If it is increased, the accuracy usually increases. If it is decreased,"
+DEFINE_string(net_resolution,           "320x320",      "Multiples of 16. If it is increased, the accuracy usually increases. If it is decreased,"
                                                         " the speed increases.");
 DEFINE_int32(num_scales,                1,              "Number of scales to average.");
 DEFINE_double(scale_gap,                0.3,            "Scale gap between scales. No effect unless num_scales>1. Initial scale is always 1. If you"
@@ -100,7 +100,7 @@ DEFINE_bool(heatmaps_add_PAFs,          false,          "Same functionality as `
 // OpenPose Face
 DEFINE_bool(face,                       false,          "Enables face keypoint detection. It will share some parameters from the body pose, e.g."
                                                         " `model_folder`.");
-DEFINE_string(face_net_resolution,      "192x192",      "Multiples of 16. Analogous to `net_resolution` but applied to the face keypoint detector."
+DEFINE_string(face_net_resolution,      "160x160",      "Multiples of 16. Analogous to `net_resolution` but applied to the face keypoint detector."
                                                         " 320x320 usually works fine while giving a substantial speed up when multiple faces on the"
                                                         " image.");
 // OpenPose Hand
