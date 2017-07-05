@@ -344,6 +344,8 @@ void imageCallback(const sensor_msgs::ImageConstPtr& msg) {
     // publish annotations.
     openpose_ros_msgs::Persons persons;
     persons.rostime = t;
+    persons.image_w = outputSize.x;
+    persons.image_h = outputSize.y;
     
     const int num_people = poseKeypoints.getSize(0);
     const int num_bodyparts = poseKeypoints.getSize(1);
