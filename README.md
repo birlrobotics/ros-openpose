@@ -1,6 +1,8 @@
 # openpose-ros
 CMU's Openpose for ROS
 
+![posefacehands](pose_face_hands.gif)
+
 ## Implementation
 
 - [X] Broadcasting Ros Message
