@@ -3,6 +3,7 @@ CMU's Openpose for ROS
 
 ## Implementation
 
+- [X] Broadcasting Ros Message
 - [X] Humans Pose Estimation
 - [ ] Face Landmark
 - [ ] Hand Pose Estimation
@@ -53,6 +54,26 @@ $ catkin_make
    + [Persons](https://github.com/ildoonet/ros-openpose/blob/master/openpose_ros_msgs/msg/PersonDetection.msg)
      + [BodyPartDetection](https://github.com/ildoonet/ros-openpose/blob/master/openpose_ros_msgs/msg/PersonDetection.msg) 
 
+BodyParts are stored as indexed 
+    Nose = 0
+    Neck = 1
+    RShoulder = 2
+    RElbow = 3
+    RWrist = 4
+    LShoulder = 5
+    LElbow = 6
+    LWrist = 7
+    RHip = 8
+    RKnee = 9
+    RAnkle = 10
+    LHip = 11
+    LKnee = 12
+    LAnkle = 13
+    REye = 14
+    LEye = 15
+    REar = 16
+    LEar = 17
+    
 ## Example
 
 ### Launch File Example
